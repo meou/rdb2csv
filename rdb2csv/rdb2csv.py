@@ -1,58 +1,49 @@
 #!/usr/bin/env python
 
 import sys
-from rdbtools import RdbParser, RdbCallback
+import getopt
+from csv_callback import CsvCallback
+from rdbtools import RdbParser
 
-class CsvCallback(RdbCallback):
-  def __init__(self, delimiter = ','):
-    self.delimiter = delimiter
+def ok_exit():
+  usage()
+  sys.exit(0)
 
-  def unsupported():
-    print ("unsupported")
+def error_exit():
+  usage()
+  sys.exit(1)
 
-  def set(self, key, value, expiry, info):
-    print ("%s%s%s" % (str(key), self.delimiter, str(value)))
+def usage():
+  print 'rdb2csv.py -i <input rdb file> -o <output csv file> [-d <column delimiter>]'
 
-  def start_hash(self, key, length, expiry, info):
-    unsupported()
-    
-  def hset(self, key, field, value):
-    unsupported()
-    
-  def hset(self, key, field, value):
-    unsupported()
-    
-  def end_hash(self, key):
-    unsupported()
-    
-  def start_set(self, key, cardinality, expiry, info):
-    unsupported()
-    
-  def sadd(self, key, member):
-    unsupported()
-    
-  def end_set(self, key):
-    unsupported()
+def main(argv):
 
-  def start_list(self, key, length, expiry, info):
-    unsupported()
+  try:
+    opts, args = getopt.getopt(argv,"hi:o:d:")
+  except getopt.GetoptError:
+    error_exit()
 
-  def rpush(self, key, value):
-    unsupported()
-  
-  def end_list(self, key):
-    unsupported()
-  
-  def start_sorted_set(self, key, length, expiry, info):
-    unsupported()  
+  rdb_file = ""
+  csv_file = ""
+  delimiter = ';'
+  for opt, arg in opts:
+    if opt == '-h':
+      ok_exit()
+    elif opt == '-i':
+      rdb_file = arg
+    elif opt == '-o':
+      csv_file = arg
+    elif opt == '-d':
+      delimiter = arg
+    else:
+      error_exit()
 
-  def zadd(self, key, score, member):
-    unsupported()
+  if (rdb_file == "") or (csv_file == ""):
+    error_exit()
 
-  def end_sorted_set(self, key):
-    unsupported()
+  callback = CsvCallback(csv_file, delimiter)
+  parser = RdbParser(callback)
+  parser.parse(rdb_file)
 
-callback = CsvCallback(';')
-parser = RdbParser(callback)
-parser.parse('/Users/jscw/Yahoo/dump.rdb')
-
+if __name__ == "__main__":
+  main(sys.argv[1:])
