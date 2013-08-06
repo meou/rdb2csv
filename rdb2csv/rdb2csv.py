@@ -1,49 +1,40 @@
 #!/usr/bin/env python
 
 import sys
-import getopt
+import optparse
 from csv_callback import CsvCallback
 from rdbtools import RdbParser
 
-def ok_exit():
-  usage()
-  sys.exit(0)
-
-def error_exit():
-  usage()
-  sys.exit(1)
-
-def usage():
-  print 'rdb2csv.py -i <input rdb file> -o <output csv file> [-d <column delimiter>]'
-
 def main(argv):
 
-  try:
-    opts, args = getopt.getopt(argv,"hi:o:d:")
-  except getopt.GetoptError:
-    error_exit()
+  parser = optparse.OptionParser()
+  parser.add_option('-i', '--input', dest='rdb_file', help="input rdb file")
+  parser.add_option('-o', '--output', dest='csv_file', help = "output csv file")
+  parser.add_option('-c', '--column_delimiter', dest='column_delimiter',
+                    help="column delimiter, default is ctrl-A ('\\001')")
+  parser.add_option('-l', '--line_delimiter', dest='line_delimiter',
+                    help="row delimiter, default is newline ('\\n')")
+  parser.add_option('-p', '--pre_key', dest='pre_key',
+                    help="columns before hash key, default is empty")
+  parser.add_option('-P', '--post_key', dest='post_key',
+                    help="columns after hash key, default is 'views clicks'")
 
-  rdb_file = ""
-  csv_file = ""
-  delimiter = ';'
-  for opt, arg in opts:
-    if opt == '-h':
-      ok_exit()
-    elif opt == '-i':
-      rdb_file = arg
-    elif opt == '-o':
-      csv_file = arg
-    elif opt == '-d':
-      delimiter = arg
-    else:
-      error_exit()
+  parser.set_defaults(column_delimiter='\001')
+  parser.set_defaults(line_delimiter='\n')
+  parser.set_defaults(pre_key='')
+  parser.set_defaults(post_key='views clicks')
+  options, remainder = parser.parse_args()
 
-  if (rdb_file == "") or (csv_file == ""):
-    error_exit()
+  if options.csv_file == None or options.rdb_file == None:
+    parser.print_help()
+    sys.exit(1)
 
-  callback = CsvCallback(csv_file, delimiter)
+  outf = open(options.csv_file, 'w')
+  callback = CsvCallback(outf, options.pre_key.split(), options.post_key.split(),
+                         options.column_delimiter, options.line_delimiter)
   parser = RdbParser(callback)
-  parser.parse(rdb_file)
+  parser.parse(options.rdb_file)
+  outf.close()
 
 if __name__ == "__main__":
   main(sys.argv[1:])
