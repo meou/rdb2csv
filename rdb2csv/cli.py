@@ -5,19 +5,19 @@ import optparse
 from csv_callback import CsvCallback
 from rdbtools import RdbParser
 
-def main(argv):
+def main():
 
   parser = optparse.OptionParser()
-  parser.add_option('-i', '--input', dest='rdb_file', help="input rdb file")
-  parser.add_option('-o', '--output', dest='csv_file', help = "output csv file")
+  parser.add_option('-i', '--input', dest='rdb_file', help="[required] input rdb file")
+  parser.add_option('-o', '--output', dest='csv_file', help = "[required] output csv file")
   parser.add_option('-c', '--column_delimiter', dest='column_delimiter',
-                    help="column delimiter, default is ctrl-A ('\\001')")
+                    help="[optional] column delimiter, default is ctrl-A ('\\001')")
   parser.add_option('-l', '--line_delimiter', dest='line_delimiter',
-                    help="row delimiter, default is newline ('\\n')")
+                    help="[optional] row delimiter, default is newline ('\\n')")
   parser.add_option('-p', '--pre_key', dest='pre_key',
-                    help="columns before hash key, default is empty")
+                    help="[optional] columns before hash key, default is empty")
   parser.add_option('-P', '--post_key', dest='post_key',
-                    help="columns after hash key, default is 'views clicks'")
+                    help="[optional] columns after hash key, default is 'views clicks'")
 
   parser.set_defaults(column_delimiter='\001')
   parser.set_defaults(line_delimiter='\n')
@@ -37,4 +37,4 @@ def main(argv):
   outf.close()
 
 if __name__ == "__main__":
-  main(sys.argv[1:])
+  main()
